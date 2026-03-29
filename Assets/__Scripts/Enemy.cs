@@ -12,9 +12,15 @@ public class Enemy : MonoBehaviour
 
     public float health = 10; // Damage needed to destroy this enemy
 
-    public int score = 100; // Points ; earned for destroying this 
+    public int score = 100; // Points ; earned for destroying this
 
-    private BoundsCheck bndCheck;
+    public float powerUpDropChance = 1f;
+    
+
+    protected bool calledShipDestroyed= false;
+
+    protected BoundsCheck bndCheck; // private to protected
+    
 
     void Awake()
     {
@@ -65,10 +71,27 @@ public class Enemy : MonoBehaviour
     void OnCollisionEnter(Collision coll)
     {
         GameObject otherGO = coll.gameObject;
-        if(otherGO.GetComponent<ProjectileHero>()!= null)
+        ProjectileHero p = otherGO.GetComponent<ProjectileHero>();
+        if(p != null)
         {
+            if (bndCheck.isOnScreen)
+            {
+                health -= Main.GET_WEAPON_DEFINITION(p.type).damageOnHit;
+
+                if (health <= 0)
+                {
+                    if (!calledShipDestroyed)
+                    {
+                        calledShipDestroyed = true;
+                        Main.SHIP_DESTROYED(this);
+                    }
+                Destroy(this.gameObject); // Destroy this Enemy GameObject
+                }
+                
+                
+            }
             Destroy(otherGO); // Destroy the Projectile
-            Destroy(gameObject); // Destroy this Enemy GameObject
+            
 
         }else
         {
